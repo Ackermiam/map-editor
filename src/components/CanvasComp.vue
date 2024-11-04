@@ -115,6 +115,7 @@ const downloadMapImage = () => {
 
   downloadLink.click();
 };
+
 onMounted(() => {
   originalCanvas = document.querySelector("canvas");
   ctx = originalCanvas.getContext("2d");
