@@ -7,6 +7,11 @@ Learn more about the recommended Project Setup and IDE Support in the [Vue Docs 
 
 # VERSIONS
 
+## V 0.1.0
+
+- Colors redefined
+- Output is now 400x400 px for a better visibility
+
 ## V 0.0.1
 
 - Basic color and download working now
