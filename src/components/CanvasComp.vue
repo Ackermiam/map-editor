@@ -22,11 +22,16 @@ const changeColor = (string: string) => {
   color.value = string;
 };
 
-let canvas;
-let ctx;
+let canvas: HTMLCanvasElement;
+let ctx: any;
 const gridSize = 25;
 
-const blocks = [];
+const mapCanvas = document.createElement('canvas');
+mapCanvas.width = 16;
+mapCanvas.height = 16;
+const mapCtx = mapCanvas.getContext('2d');
+
+const blocks: any[] = [];
 
 const drawGrid = () => {
   ctx.strokeStyle = "#ddd";
@@ -44,7 +49,7 @@ const drawGrid = () => {
   }
 };
 
-const drawSquare = (x, y) => {
+const drawSquare = (x: number, y: number) => {
   const gridX = Math.floor(x / gridSize) * gridSize;
   const gridY = Math.floor(y / gridSize) * gridSize;
 
@@ -62,21 +67,57 @@ const redrawBlocks = () => {
 };
 
 const downloadCanvasImage = () => {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
   redrawBlocks();
+  const mapImage = generateMapImage();
+  const downloadLink = document.createElement('a');
+  downloadLink.href = mapImage;
+  downloadLink.download = 'map16x16.png';
 
-  const image = canvas.toDataURL();
-  const downloadLink = document.createElement("a");
-  downloadLink.href = image;
-  downloadLink.download = "map400x400.png";
   downloadLink.click();
 
   drawGrid();
 };
 
+const generateMapImage = () => {
+  mapCtx.clearRect(0, 0, mapCanvas.width, mapCanvas.height);
+
+  for (let y = 0; y < 16; y++) {
+    for (let x = 0; x < 16; x++) {
+      const imageData = ctx.getImageData(x * 25, y * 25, 25, 25);
+      const color = averageColor(imageData);
+
+      if (color.alpha > 0) {
+        mapCtx.fillStyle = `rgba(${color.r}, ${color.g}, ${color.b}, ${color.alpha})`;
+        mapCtx.fillRect(x, y, 1, 1);
+      }
+    }
+  }
+
+  const mapImage = mapCanvas.toDataURL("image/png");
+  return mapImage;
+};
+
+const averageColor = (imageData) => {
+  const data = imageData.data;
+  let r = 0, g = 0, b = 0, a = 0;
+  for (let i = 0; i < data.length; i += 4) {
+    r += data[i];
+    g += data[i + 1];
+    b += data[i + 2];
+    a += data[i + 3];
+  }
+  const pixelCount = data.length / 4;
+  return {
+    r: Math.round(r / pixelCount),
+    g: Math.round(g / pixelCount),
+    b: Math.round(b / pixelCount),
+    alpha: Math.round(a / pixelCount) / 255
+  };
+};
+
 onMounted(() => {
   canvas = document.querySelector("canvas");
+
   ctx = canvas.getContext("2d");
 
   drawGrid();
