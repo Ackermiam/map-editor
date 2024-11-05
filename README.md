@@ -7,6 +7,10 @@ Learn more about the recommended Project Setup and IDE Support in the [Vue Docs 
 
 # VERSIONS
 
+## V 0.2.0
+
+- Stopped the 400x400 px format, 16x16 is good !
+
 ## V 0.1.0
 
 - Colors redefined
