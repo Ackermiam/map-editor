@@ -1,45 +1,15 @@
 <template>
   <div class="CanvasComp">
     <div>
-      <button
-        @click="
-          () => {
-            color = 'turquoise';
-          }
-        "
-      >
-        eau
-      </button>
-      <button
-        @click="
-          () => {
-            color = 'green';
-          }
-        "
-      >
-        herbe
-      </button>
-      <button
-        @click="
-          () => {
-            color = 'sienna';
-          }
-        "
-      >
-        terre
-      </button>
-      <button
-        @click="
-          () => {
-            color = 'grey';
-          }
-        "
-      >
-        pierre
-      </button>
+      <button @click="changeColor('turquoise')">eau</button>
+      <button @click="changeColor('green')">herbe</button>
+      <button @click="changeColor('sienna')">terre</button>
+      <button @click="changeColor('grey')">pierre</button>
     </div>
     <canvas id="mapEditor" width="400" height="400"></canvas>
-    <button @click="downloadCanvasImage()" class="download">Télécharger Map</button>
+    <button @click="downloadCanvasImage()" class="download">
+      Télécharger Map
+    </button>
   </div>
 </template>
 
@@ -47,6 +17,10 @@
 import { onMounted, ref } from "vue";
 
 const color = ref("blue");
+
+const changeColor = (string: string) => {
+  color.value = string;
+};
 
 let canvas;
 let ctx;
@@ -81,7 +55,7 @@ const drawSquare = (x, y) => {
 };
 
 const redrawBlocks = () => {
-  blocks.forEach(block => {
+  blocks.forEach((block) => {
     ctx.fillStyle = block.color;
     ctx.fillRect(block.x, block.y, gridSize, gridSize);
   });
@@ -107,7 +81,7 @@ onMounted(() => {
 
   drawGrid();
 
-  canvas.addEventListener("click", event => {
+  canvas.addEventListener("click", (event) => {
     const rect = canvas.getBoundingClientRect();
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
