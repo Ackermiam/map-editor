@@ -16,7 +16,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
 
-const color = ref("blue");
+const color = ref("sienna");
 
 const changeColor = (string: string) => {
   color.value = string;
