@@ -1,14 +1,12 @@
 <template>
   <div class="CanvasComp">
     <div>
-      <button @click="changeColor('turquoise')">eau</button>
-      <button @click="changeColor('green')">herbe</button>
-      <button @click="changeColor('sienna')">terre</button>
-      <button @click="changeColor('grey')">pierre</button>
+      <button @click="changeColor('black')">obstacle</button>
+      <button @click="changeColor('white')">effacer</button>
     </div>
     <canvas id="mapEditor" width="400" height="400"></canvas>
-    <button @click="downloadCanvasImage()" class="download">
-      Télécharger Map
+    <button @click="exportColoredBlocks()" class="download">
+      Exporter Map
     </button>
   </div>
 </template>
@@ -25,11 +23,6 @@ const changeColor = (string: string) => {
 let canvas: HTMLCanvasElement;
 let ctx: any;
 const gridSize = 25;
-
-const mapCanvas = document.createElement('canvas');
-mapCanvas.width = 16;
-mapCanvas.height = 16;
-const mapCtx = mapCanvas.getContext('2d');
 
 const blocks: any[] = [];
 
@@ -50,69 +43,35 @@ const drawGrid = () => {
 };
 
 const drawSquare = (x: number, y: number) => {
-  const gridX = Math.floor(x / gridSize) * gridSize;
-  const gridY = Math.floor(y / gridSize) * gridSize;
+  const gridX = Math.floor(x / gridSize);
+  const gridY = Math.floor(y / gridSize);
 
-  ctx.fillStyle = color.value;
-  ctx.fillRect(gridX, gridY, gridSize, gridSize);
+  const existingBlockIndex = blocks.findIndex((block) => block.x === gridX && block.z === gridY);
 
-  blocks.push({ x: gridX, y: gridY, color: color.value });
-};
+  if (color.value === "white") {
+    if (existingBlockIndex !== -1) {
+      blocks.splice(existingBlockIndex, 1);
+    }
+    ctx.clearRect(gridX * gridSize, gridY * gridSize, gridSize, gridSize);
+    ctx.strokeStyle = "#ddd";
+    ctx.strokeRect(gridX * gridSize, gridY * gridSize, gridSize, gridSize);
+  } else {
+    ctx.fillStyle = color.value;
+    ctx.fillRect(gridX * gridSize, gridY * gridSize, gridSize, gridSize);
 
-const redrawBlocks = () => {
-  blocks.forEach((block) => {
-    ctx.fillStyle = block.color;
-    ctx.fillRect(block.x, block.y, gridSize, gridSize);
-  });
-};
-
-const downloadCanvasImage = () => {
-  redrawBlocks();
-  const mapImage = generateMapImage();
-  const downloadLink = document.createElement('a');
-  downloadLink.href = mapImage;
-  downloadLink.download = 'map16x16.png';
-
-  downloadLink.click();
-
-  drawGrid();
-};
-
-const generateMapImage = () => {
-  mapCtx.clearRect(0, 0, mapCanvas.width, mapCanvas.height);
-
-  for (let y = 0; y < 16; y++) {
-    for (let x = 0; x < 16; x++) {
-      const imageData = ctx.getImageData(x * 25, y * 25, 25, 25);
-      const color = averageColor(imageData);
-
-      if (color.alpha > 0) {
-        mapCtx.fillStyle = `rgba(${color.r}, ${color.g}, ${color.b}, ${color.alpha})`;
-        mapCtx.fillRect(x, y, 1, 1);
-      }
+    if (existingBlockIndex === -1) {
+      blocks.push({ x: gridX, z: gridY, color: color.value });
+    } else {
+      blocks[existingBlockIndex].color = color.value;
     }
   }
-
-  const mapImage = mapCanvas.toDataURL("image/png");
-  return mapImage;
 };
 
-const averageColor = (imageData) => {
-  const data = imageData.data;
-  let r = 0, g = 0, b = 0, a = 0;
-  for (let i = 0; i < data.length; i += 4) {
-    r += data[i];
-    g += data[i + 1];
-    b += data[i + 2];
-    a += data[i + 3];
-  }
-  const pixelCount = data.length / 4;
-  return {
-    r: Math.round(r / pixelCount),
-    g: Math.round(g / pixelCount),
-    b: Math.round(b / pixelCount),
-    alpha: Math.round(a / pixelCount) / 255
-  };
+const exportColoredBlocks = () => {
+  const coloredBlocks = blocks
+    .filter((block) => block.color === "black")
+    .map(({ x, z }) => ({ x, z }));
+  console.log(JSON.stringify(coloredBlocks, null, 2));
 };
 
 onMounted(() => {
