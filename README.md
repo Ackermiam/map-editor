@@ -7,6 +7,17 @@ Learn more about the recommended Project Setup and IDE Support in the [Vue Docs 
 
 # VERSIONS
 
+## V 1.5.0
+
+- now 24x24 for labyrinth use
+- download map available
+- clear block available
+- add character block
+
+## V 1.0.0
+
+- Add more block possibilities
+
 ## V 0.2.0
 
 - Stopped the 400x400 px format, 16x16 is good !

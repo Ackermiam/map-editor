@@ -8,6 +8,6 @@ import JSONINFO from "../../package.json";
 
 <style scoped>
 h1 {
-  margin-bottom: 2em;
+  margin-bottom: 1em;
 }
 </style>

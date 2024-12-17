@@ -2,12 +2,13 @@
   <div class="CanvasComp">
     <div>
       <button @click="changeColor('black')">obstacle</button>
+      <button @click="changeColor('purple')">personnage</button>
       <button @click="changeColor('white')">effacer</button>
+      <button @click="exportColoredBlocks()" class="download">
+        Télécharger Map
+      </button>
     </div>
-    <canvas id="mapEditor" width="400" height="400"></canvas>
-    <button @click="exportColoredBlocks()" class="download">
-      Exporter Map
-    </button>
+    <canvas id="mapEditor" width="600" height="600"></canvas>
   </div>
 </template>
 
@@ -49,13 +50,29 @@ const drawSquare = (x: number, y: number) => {
   const existingBlockIndex = blocks.findIndex((block) => block.x === gridX && block.z === gridY);
 
   if (color.value === "white") {
+    // Effacer une case
     if (existingBlockIndex !== -1) {
       blocks.splice(existingBlockIndex, 1);
     }
     ctx.clearRect(gridX * gridSize, gridY * gridSize, gridSize, gridSize);
     ctx.strokeStyle = "#ddd";
     ctx.strokeRect(gridX * gridSize, gridY * gridSize, gridSize, gridSize);
+  } else if (color.value === "purple") {
+    // Effacer l'ancienne case violette
+    const previousPurpleIndex = blocks.findIndex((block) => block.color === "purple");
+    if (previousPurpleIndex !== -1) {
+      const previousBlock = blocks[previousPurpleIndex];
+      blocks.splice(previousPurpleIndex, 1);
+      ctx.clearRect(previousBlock.x * gridSize, previousBlock.z * gridSize, gridSize, gridSize);
+      ctx.strokeStyle = "#ddd";
+      ctx.strokeRect(previousBlock.x * gridSize, previousBlock.z * gridSize, gridSize, gridSize);
+    }
+    // Ajouter la nouvelle case violette
+    ctx.fillStyle = color.value;
+    ctx.fillRect(gridX * gridSize, gridY * gridSize, gridSize, gridSize);
+    blocks.push({ x: gridX, z: gridY, color: color.value });
   } else {
+    // Ajouter d'autres cases (ex: black)
     ctx.fillStyle = color.value;
     ctx.fillRect(gridX * gridSize, gridY * gridSize, gridSize, gridSize);
 
@@ -68,10 +85,47 @@ const drawSquare = (x: number, y: number) => {
 };
 
 const exportColoredBlocks = () => {
-  const coloredBlocks = blocks
+  const characterPlacement = blocks.find((block) => block.color === "purple");
+
+  const level = blocks
     .filter((block) => block.color === "black")
     .map(({ x, z }) => ({ x, z }));
-  console.log(JSON.stringify(coloredBlocks, null, 2));
+
+  const result = {
+    characterPlacement: characterPlacement
+      ? { x: characterPlacement.x, z: characterPlacement.z }
+      : null,
+    level,
+  };
+
+  // Affichage dans la console
+  console.log(JSON.stringify(result, null, 2));
+
+  // Création du Blob avec le contenu JSON
+  const blob = new Blob([JSON.stringify(result, null, 2)], { type: "application/json" });
+
+  // Création d'un lien pour le téléchargement
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = "mapData.json";  // Nom du fichier téléchargé
+
+  // Simulation d'un clic pour télécharger le fichier
+  link.click();
+};
+
+const fillBorders = () => {
+  const rows = canvas.height / gridSize;
+  const cols = canvas.width / gridSize;
+
+  for (let x = 0; x < cols; x++) {
+    drawSquare(x * gridSize, 0); // Ligne du haut
+    drawSquare(x * gridSize, (rows - 1) * gridSize); // Ligne du bas
+  }
+
+  for (let y = 0; y < rows; y++) {
+    drawSquare(0, y * gridSize); // Colonne de gauche
+    drawSquare((cols - 1) * gridSize, y * gridSize); // Colonne de droite
+  }
 };
 
 onMounted(() => {
@@ -79,6 +133,7 @@ onMounted(() => {
 
   ctx = canvas.getContext("2d");
 
+  fillBorders();
   drawGrid();
 
   canvas.addEventListener("click", (event) => {
@@ -99,10 +154,14 @@ onMounted(() => {
 
 #mapEditor {
   border: 6px solid #213547;
-  margin-bottom: 2em;
 }
 
 button {
   margin: 0 1em 2em 0;
+}
+
+.download {
+  background: rgb(42, 136, 42);
+  color: white;
 }
 </style>
