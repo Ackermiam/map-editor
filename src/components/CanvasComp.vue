@@ -1,7 +1,8 @@
 <template>
   <div class="CanvasComp">
-    <div>
+    <div style="width: 500px; display: flex; flex-wrap: wrap">
       <button @click="changeColor('black')">obstacle</button>
+      <button @click="changeColor('pink')">téléportation</button>
       <button @click="changeColor('purple')">personnage</button>
       <button @click="changeColor('white')">effacer</button>
       <button @click="exportColoredBlocks()" class="download">
@@ -91,11 +92,16 @@ const exportColoredBlocks = () => {
     .filter((block) => block.color === "black")
     .map(({ x, z }) => ({ x, z }));
 
+  const tpPlacement = blocks
+    .filter((block) => block.color === "pink")
+    .map(({ x, z }) => ({ x, z }));
+
   const result = {
     characterPlacement: characterPlacement
       ? { x: characterPlacement.x, z: characterPlacement.z }
       : null,
     level,
+    tpPlacement
   };
 
   // Affichage dans la console
